@@ -1,0 +1,36 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+void yyerror(const char *s);
+int yylex(void);
+%}
+
+%token CHAR
+
+%%
+input: /* empty */
+     | input line
+     ;
+
+line: palindrome '\n' { printf("Palindrome\n"); }
+    | non_palindrome '\n' { printf("Not a palindrome\n"); }
+    ;
+
+palindrome: CHAR { $$ = $1; }
+          | CHAR palindrome CHAR { $$ = ($1 == $3) ? $2 : -1; }
+          ;
+
+non_palindrome: CHAR palindrome CHAR { $$ = ($1 != $3) ? 1 : -1; }
+              ;
+
+%%
+
+void yyerror(const char *s) {
+    fprintf(stderr, "%s\n", s);
+}
+
+int main(void) {
+    yyparse();
+    return 0;
+}
